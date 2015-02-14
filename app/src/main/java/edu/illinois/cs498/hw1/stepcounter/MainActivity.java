@@ -10,12 +10,15 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
+
+import static android.util.FloatMath.sqrt;
 
 
 public class MainActivity extends ActionBarActivity implements SensorEventListener {
@@ -27,16 +30,24 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private Sensor senLight;
     private long startTime = System.currentTimeMillis();
 
+
+    public static final float ALPHA = (float) 0.7;
+
     private File readingsFile;
     private FileOutputStream readingsOutputStream;
     private String sensorFileName = "sensorReadings.csv";
 
     //cached values for the sensor readings
     float [] cachedAccelerometer = {0,0,0};
+    float cachedAcceleration = 0;
     float [] cachedGyroscope = {0,0,0};
     float [] cachedMagnetometer = {0,0,0};
     float cachedLightSensor = 0;
 
+    private int numSteps = 0;
+    private long lastStepCountTime = 0;
+
+    private TextView stepsTextView = null;
 
     public void initializeFile(){
         try {
@@ -77,8 +88,23 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
-//            Toast.makeText(this, "Accelerometer " + x + " " + y + " " + z, Toast.LENGTH_LONG).show();
+
+            cachedAcceleration = (1-ALPHA) * cachedAcceleration + ALPHA * sqrt(x*x + y*y + z*z);
+
             System.arraycopy(sensorEvent.values, 0, cachedAccelerometer, 0, sensorEvent.values.length);
+
+
+            if(cachedAcceleration > 11.5)
+            {
+                if (currTime - lastStepCountTime > 300)
+                {
+                    numSteps++;
+                    lastStepCountTime = currTime;
+                    stepsTextView.setText(String.valueOf(numSteps));
+                }
+            }
+
+
         }
         else if (mySensor.getType() == Sensor.TYPE_GYROSCOPE){
             float x = sensorEvent.values[0];
@@ -107,7 +133,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         String gyr = cachedGyroscope[0] + "," + cachedGyroscope[1] + "," + cachedGyroscope[2] + ",";
         String mag = cachedMagnetometer[0] + "," + cachedMagnetometer[1] + "," + cachedMagnetometer[2] + ",";
 
-        String all = timestamp + "," + acc + gyr + mag + String.valueOf(cachedLightSensor) + "\n";
+        String all = timestamp + "," + acc + gyr + mag + String.valueOf(cachedLightSensor) + " , " + cachedAcceleration+ "\n";
         try {
                 readingsOutputStream.write( all.getBytes() );
                 readingsOutputStream.flush();
@@ -138,6 +164,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        stepsTextView = (TextView) findViewById(R.id.stepCounter);
+
         initializeSensors();
         initializeFile();
 
