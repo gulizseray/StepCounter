@@ -20,6 +20,8 @@ import java.util.Calendar;
 
 import static android.util.FloatMath.sqrt;
 
+//Collect sensor data and count steps
+
 
 public class MainActivity extends ActionBarActivity implements SensorEventListener {
 
