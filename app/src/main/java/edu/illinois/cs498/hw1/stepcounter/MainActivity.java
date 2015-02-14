@@ -110,6 +110,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         String all = timestamp + "," + acc + gyr + mag + String.valueOf(cachedLightSensor) + "\n";
         try {
                 readingsOutputStream.write( all.getBytes() );
+                readingsOutputStream.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
