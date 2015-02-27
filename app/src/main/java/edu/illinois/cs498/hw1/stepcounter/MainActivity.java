@@ -135,7 +135,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         String gyr = cachedGyroscope[0] + "," + cachedGyroscope[1] + "," + cachedGyroscope[2] + ",";
         String mag = cachedMagnetometer[0] + "," + cachedMagnetometer[1] + "," + cachedMagnetometer[2] + ",";
 
-        String all = timestamp + "," + acc + gyr + mag + String.valueOf(cachedLightSensor) + " , " + cachedAcceleration+ "\n";
+        //String all = timestamp + "," + acc + gyr + mag + String.valueOf(cachedLightSensor) + " , " + cachedAcceleration + "\n";
+        String all = timestamp + "," + acc + gyr + mag + String.valueOf(cachedLightSensor) + "\n";
         try {
                 readingsOutputStream.write( all.getBytes() );
                 readingsOutputStream.flush();
