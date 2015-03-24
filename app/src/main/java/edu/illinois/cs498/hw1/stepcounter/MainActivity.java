@@ -39,7 +39,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private FileOutputStream readingsOutputStream;
     private String sensorFileName = "sensorReadings.csv";
 
-    //cached values for the sensor readings
+    // Cached values for the sensor readings
     float [] cachedAccelerometer = {0,0,0};
     float cachedAcceleration = 0;
     float [] cachedGyroscope = {0,0,0};
@@ -91,13 +91,16 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
 
+            // Low-pass filter to remove noise
             cachedAcceleration = (1-ALPHA) * cachedAcceleration + ALPHA * sqrt(x*x + y*y + z*z);
 
+            // Copy new values into the cachedAccelerometer array (We didn't use these values for step counter)
             System.arraycopy(sensorEvent.values, 0, cachedAccelerometer, 0, sensorEvent.values.length);
 
-
+            // Peak is substantial enough to be correlated to a step
             if(cachedAcceleration > 11.5)
             {
+                // There needs to be at least 300ms between two peaks, otherwise it isn't a step.
                 if (currTime - lastStepCountTime > 300)
                 {
                     numSteps++;
